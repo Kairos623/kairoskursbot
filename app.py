@@ -15,11 +15,11 @@ def get_usd_rate():
     url = 'https://www.cbr-xml-daily.ru/daily_json.js'
     try:
         response = requests.get(url)
-        response.raise_for_status()  # Проверка успешности запроса
+        response.raise_for_status()
         data = response.json()
         return data['Valute']['USD']['Value']
     except (requests.exceptions.RequestException, KeyError) as e:
-        return None  # Возвращаем None, если произошла ошибка
+        return None
 
 
 @dp.message(Command('start'))

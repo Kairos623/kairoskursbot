@@ -37,13 +37,11 @@ async def handle_name(message: Message):
     else:
         await message.answer(f"Рад знакомству, {user_name}! К сожалению, не удалось получить данные о курсе доллара.")
 
-    # Создаем инлайн-кнопки
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Начать заново", callback_data="restart")],
         [InlineKeyboardButton(text="Получить курс снова", callback_data="get_rate")]
     ])
 
-    # Отправляем сообщение с кнопками
     await message.answer("Что хотите сделать дальше?", reply_markup=keyboard)
 
 

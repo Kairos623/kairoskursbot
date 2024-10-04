@@ -2,7 +2,7 @@ import requests
 import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram import F
 
 API_TOKEN = '7625972697:AAHev481wOMvrYlWwmUMH1kGE7n2HlyuBpU'
@@ -36,6 +36,31 @@ async def handle_name(message: Message):
         await message.answer(f"Рад знакомству, {user_name}! Курс доллара сегодня {usd_rate:.2f}р.")
     else:
         await message.answer(f"Рад знакомству, {user_name}! К сожалению, не удалось получить данные о курсе доллара.")
+
+    # Создаем инлайн-кнопки
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Начать заново", callback_data="restart")],
+        [InlineKeyboardButton(text="Получить курс снова", callback_data="get_rate")]
+    ])
+
+    # Отправляем сообщение с кнопками
+    await message.answer("Что хотите сделать дальше?", reply_markup=keyboard)
+
+
+@dp.callback_query(F.data == "restart")
+async def handle_restart(callback_query):
+    await callback_query.message.answer("Добрый день. Как вас зовут?")
+    await callback_query.answer()
+
+
+@dp.callback_query(F.data == "get_rate")
+async def handle_get_rate(callback_query):
+    usd_rate = get_usd_rate()
+    if usd_rate is not None:
+        await callback_query.message.answer(f"Курс доллара сегодня {usd_rate:.2f}р.")
+    else:
+        await callback_query.message.answer("К сожалению, не удалось получить данные о курсе доллара.")
+    await callback_query.answer()
 
 
 async def main():

@@ -1,5 +1,5 @@
-import requests
 import asyncio
+import aiohttp
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
@@ -11,14 +11,15 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
 
-def get_usd_rate():
+async def get_usd_rate():
     url = 'https://www.cbr-xml-daily.ru/daily_json.js'
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        return data['Valute']['USD']['Value']
-    except (requests.exceptions.RequestException, KeyError) as e:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                response.raise_for_status()
+                data = await response.json()
+                return data['Valute']['USD']['Value']
+    except (aiohttp.ClientError, KeyError):
         return None
 
 
@@ -30,7 +31,7 @@ async def send_welcome(message: Message):
 @dp.message(F.text)
 async def handle_name(message: Message):
     user_name = message.text
-    usd_rate = get_usd_rate()
+    usd_rate = await get_usd_rate()
 
     if usd_rate is not None:
         await message.answer(f"Рад знакомству, {user_name}! Курс доллара сегодня {usd_rate:.2f}р.")
@@ -53,7 +54,7 @@ async def handle_restart(callback_query):
 
 @dp.callback_query(F.data == "get_rate")
 async def handle_get_rate(callback_query):
-    usd_rate = get_usd_rate()
+    usd_rate = await get_usd_rate()
     if usd_rate is not None:
         await callback_query.message.answer(f"Курс доллара сегодня {usd_rate:.2f}р.")
     else:
